@@ -1,5 +1,0 @@
-__pycache__/ 
-*.pyc 
-*.pkl 
-bert_encoder/ 
-.ipynb_checkpoints/ 
