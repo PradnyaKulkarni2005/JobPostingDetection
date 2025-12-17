@@ -8,12 +8,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 from sentence_transformers import SentenceTransformer
+import os
 
 # Load models
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # BERT = text → embeddings
 # SVM = embeddings → prediction
-svm_model = joblib.load("svm_model.pkl")
-bert_model = SentenceTransformer("bert_encoder")
+svm_model = joblib.load(os.path.join(BASE_DIR, "svm_model.pkl"))
+bert_model = SentenceTransformer(os.path.join(BASE_DIR, "bert_encoder"))
 
 # This creates the API app
 app = FastAPI()
@@ -21,7 +23,7 @@ app = FastAPI()
 # Allow requests from frontend
 origins = [
     "http://localhost:3000",     # React/Next.js dev server
-    "https://dreamcanvas-murex.vercel.app/"  # Your deployed frontend
+    "https://dreamcanvas-murex.vercel.app"  # Your deployed frontend
 ]
 
 app.add_middleware(
@@ -45,6 +47,9 @@ class JobPost(BaseModel):
 # User sends a POST request to /predict with JSON containing the job description.
 # Example request body:
 # { "description": "Work from home, earn $5000 weekly, no experience needed..." }
+@app.get("/")
+def health():
+    return {"status": "API running"}
 
 @app.post("/predict")
 def predict(post: JobPost):
@@ -59,8 +64,12 @@ def predict(post: JobPost):
     # Returns 1 if fraudulent (fake job), 0 if real.
     
     pred = svm_model.predict(embedding)[0]
+    proba = svm_model.predict_proba(embedding)[0].max()
     # Send Response
     # return {"prediction": int(pred)}
     # The API responds with a JSON object like:
     # { "prediction": 1 }
-    return {"prediction": int(pred)}  # 1 = Fake, 0 = Real
+    return {
+        "prediction": int(pred),
+        "confidence": float(proba)
+    }  # 1 = Fake, 0 = Real
