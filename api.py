@@ -39,7 +39,11 @@ if not os.path.exists(SVM_MODEL_PATH):
 svm_model = joblib.load(SVM_MODEL_PATH)
 
 # Auto-download public BERT model
-bert_model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
+bert_model = SentenceTransformer(
+    "paraphrase-MiniLM-L3-v2",
+    device="cpu"
+)
+
 
 
 
