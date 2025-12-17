@@ -26,7 +26,7 @@ SVM_MODEL_URL = (
 
 if not os.path.exists(SVM_MODEL_PATH):
     print(" Downloading SVM model...")
-    response = requests.get(SVM_MODEL_URL)
+    response = requests.get(SVM_MODEL_URL, timeout=60)
     response.raise_for_status()  # fail fast if download breaks
 
     with open(SVM_MODEL_PATH, "wb") as f:
@@ -39,7 +39,8 @@ if not os.path.exists(SVM_MODEL_PATH):
 svm_model = joblib.load(SVM_MODEL_PATH)
 
 # Auto-download public BERT model
-bert_model = SentenceTransformer("all-MiniLM-L6-v2")
+bert_model = SentenceTransformer("paraphrase-MiniLM-L3-v2")
+
 
 
 # This creates the API app
