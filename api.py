@@ -9,13 +9,38 @@ from pydantic import BaseModel
 import joblib
 from sentence_transformers import SentenceTransformer
 import os
+import requests
+
 
 # Load models
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# BERT = text → embeddings
-# SVM = embeddings → prediction
-svm_model = joblib.load(os.path.join(BASE_DIR, "svm_model.pkl"))
-bert_model = SentenceTransformer(os.path.join(BASE_DIR, "bert_encoder"))
+SVM_MODEL_PATH = os.path.join(BASE_DIR, "svm_model.pkl")
+
+# Public GitHub Release URL (your model)
+SVM_MODEL_URL = (
+    "https://github.com/PradnyaKulkarni2005/"
+    "JobPostingDetection/releases/download/v1.0/svm_model.pkl"
+)
+
+# Download SVM model if not present
+
+if not os.path.exists(SVM_MODEL_PATH):
+    print(" Downloading SVM model...")
+    response = requests.get(SVM_MODEL_URL)
+    response.raise_for_status()  # fail fast if download breaks
+
+    with open(SVM_MODEL_PATH, "wb") as f:
+        f.write(response.content)
+
+    print("✅ SVM model downloaded")
+
+# Load models
+
+svm_model = joblib.load(SVM_MODEL_PATH)
+
+# Auto-download public BERT model
+bert_model = SentenceTransformer("all-MiniLM-L6-v2")
+
 
 # This creates the API app
 app = FastAPI()
