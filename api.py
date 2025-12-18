@@ -94,12 +94,16 @@ def predict(post: JobPost):
     # Returns 1 if fraudulent (fake job), 0 if real.
     
     pred = svm_model.predict(embedding)[0]
-    proba = svm_model.predict_proba(embedding)[0].max()
-    # Send Response
-    # return {"prediction": int(pred)}
-    # The API responds with a JSON object like:
-    # { "prediction": 1 }
+    
+    # Distance from decision boundary
+    score = svm_model.decision_function(embedding)
+
+    # Convert to pseudo-confidence (0–1 range)
+    confidence = float(abs(score[0]) / (abs(score[0]) + 1))
+
     return {
         "prediction": int(pred),
-        "confidence": float(proba)
-    }  # 1 = Fake, 0 = Real
+        "confidence": confidence
+    } # 1 = Fake, 0 = Real
+
+
